@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+<title>WEBGIS GARIS PANTAI TUTUYAN</title>
+
+<link rel="stylesheet" href="css/leaflet.css">
+
+<style>
+
+/* FIX SCROLL */
+html, body {
+    height: auto;
+    overflow-y: auto;
+}
+
+/* BODY */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #ffe4ec, #f5d0c5);
+    min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+    text-align: center;
+    padding: 20px;
+    color: #5d4037;
+}
+
+/* CONTAINER */
+.main-container {
+    width: 95%;
+    max-width: 1200px;
+    margin: auto;
+    margin-bottom: 40px; /* biar bisa scroll */
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    padding: 20px;
+    animation: fadeIn 0.8s ease;
+}
+
+/* DESKRIPSI */
+.description-box {
+    background: #fff9f9;
+    border-left: 6px solid #f48fb1;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: 0.3s;
+}
+
+.description-box:hover {
+    transform: scale(1.01);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+/* FLEX */
+.content {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap; /* penting agar responsif */
+}
+
+/* MAP */
+#map {
+    flex: 1 1 60%;
+    min-width: 300px;
+    height: 500px;
+    border-radius: 15px;
+    border: 3px solid #5d4037;
+    position: relative;
+}
+
+/* SIDEBAR */
+.sidebar {
+    flex: 1 1 35%;
+    min-width: 250px;
+    background: #fff0f5;
+    border-radius: 15px;
+    padding: 15px;
+}
+
+/* LEGEND */
+.legend div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.legend span {
+    width: 25px;
+    height: 6px;
+    margin-right: 10px;
+}
+
+/* KOMPAS */
+.kompas {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 999;
+}
+.kompas span {
+    position: absolute;
+    font-weight: bold;
+}
+.n { top: 5px; left: 50%; transform: translateX(-50%); }
+.s { bottom: 5px; left: 50%; transform: translateX(-50%); }
+.e { right: 5px; top: 50%; transform: translateY(-50%); }
+.w { left: 5px; top: 50%; transform: translateY(-50%); }
+
+/* ANIMASI */
+@keyframes fadeIn {
+    from {opacity:0; transform:translateY(20px);}
+    to {opacity:1; transform:translateY(0);}
+}
+
+/* FOOTER */
+.footer {
+    text-align: center;
+    padding: 15px;
+    color: #5d4037;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>WEBGIS GARIS PANTAI</h1>
+    <p>Kecamatan Tutuyan - Bolaang Mongondow Timur</p>
+</div>
+
+<div class="main-container">
+
+<div class="description-box">
+<h3>📍 Deskripsi WebGIS</h3>
+
+<p>
+WebGIS ini menampilkan persebaran <b>garis pantai</b> di Kecamatan Tutuyan. 
+Garis pantai merupakan batas antara daratan dan laut yang penting 
+untuk analisis wilayah pesisir, perencanaan tata ruang, dan pengelolaan sumber daya.
+</p>
+
+<p>
+Klik setiap garis pantai untuk melihat nama pantai dan lokasi secara interaktif.
+</p>
+
+
+</div>
+
+<div class="content">
+
+<div id="map">
+    <div class="kompas">
+        <span class="n">N</span>
+        <span class="s">S</span>
+        <span class="e">E</span>
+        <span class="w">W</span>
+    </div>
+</div>
+
+<div class="sidebar">
+    <h3>📌 Informasi</h3>
+    <p>Klik garis pantai untuk melihat nama pantai.</p>
+
+    <h4>🗺️ Legenda</h4>
+    <div class="legend">
+        <div><span style="background:white;border:1px solid black;"></span> Garis Pantai</div>
+        <div><span style="background:#f48fb1;"></span> Batas Kecamatan</div>
+    </div>
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+Nama: <b>Prisilya Yacobus</b> | NIM: <b>241011060012</b>
+</div>
+
+<script src="js/leaflet.js"></script>
+<script src="data/ADMINISTRASIKECAMATAN_AR_50K_1.js"></script>
+<script src="data/GARISRPANTAI_LN_50K_2.js"></script>
+
+<script>
+
+// MAP
+var map = L.map('map').fitBounds([[0.47,124.07],[0.98,124.74]]);
+
+// BASEMAP
+L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+    maxZoom: 28
+}).addTo(map);
+
+// ADMIN
+function styleAdmin() {
+    return {
+        color: "#8b5a5a",
+        weight: 1,
+        fillColor: "#f48fb1",
+        fillOpacity: 0.3
+    };
+}
+
+L.geoJSON(json_ADMINISTRASIKECAMATAN_AR_50K_1, {
+    style: styleAdmin
+}).addTo(map);
+
+// GARIS PANTAI STYLE
+function stylePantai() {
+    return {
+        color: "#ffffff",
+        weight: 3
+    };
+}
+
+// HOVER
+function highlight(e) {
+    e.target.setStyle({
+        color: "#ff69b4",
+        weight: 5
+    });
+}
+
+function reset(e) {
+    garisPantai.resetStyle(e.target);
+}
+
+// INTERAKSI
+function onEachPantai(feature, layer) {
+
+    var nama = feature.properties.NAMOBJ || "Pantai Tidak Diketahui";
+
+    layer.bindPopup("<b>🌊 " + nama + "</b>");
+
+    layer.on({
+        mouseover: highlight,
+        mouseout: reset
+    });
+
+    layer.on('click', function () {
+        map.fitBounds(layer.getBounds(), {
+            padding: [50,50]
+        });
+    });
+}
+
+// LOAD
+var garisPantai = L.geoJSON(json_GARISRPANTAI_LN_50K_2, {
+    style: stylePantai,
+    onEachFeature: onEachPantai
+}).addTo(map);
+
+</script>
+
+</body>
+</html>
